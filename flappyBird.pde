@@ -1,5 +1,5 @@
-float speedX = 2;
-float speedY = 1.5;
+float speedX = 3.5;
+float speedY = 3;
 
 float axeX = 900, axeY = 600;
 float obs_x = 950;
@@ -12,11 +12,15 @@ float[] collisionX;
 float[] collisionY;
 
 int obsNumber = 10;
+String birdName;
 
 PImage birdImg;
 PImage obstacleImgTop;
 PImage obstacleImgBottom;
 PImage bgImg;
+int num = 1;
+int score = 0;
+
 
 Obstacle[] obstacle;
 Bird bird;
@@ -51,34 +55,35 @@ void setup(){
   
   /// The Bird
   bird = new Bird(pos_x, pos_y, radius);
+  birdName = "b1.gif";
+//  bgImg = loadImage("bg.png");
+  birdImg = loadImage(birdName);
   
-  bgImg = loadImage("bg.png");
-  birdImg = loadImage("bird.png");
   obstacleImgTop = loadImage("obstacle0.png");
   obstacleImgBottom = loadImage("obstacle1.png");
+  
+  //The score
+  //displayScore = "Score :";
 }
-int cc = 0;
+
+
+int t = 0;
+int T = 0;
 void draw(){
+  background(255);
+  if(num <= 5) birdName = "bird1.png";
+  if (num > 5 && num <=10) birdName = "bird2.png"; 
+  birdImg = loadImage(birdName); 
   
-  cc ++;
-  if (cc >= 0 && cc < 2) {
-    birdImg = loadImage("Bird1.png");
-  } else if (cc >= 2 && cc < 4) {
-   birdImg = loadImage("Bird3.png"); 
-  } else if (cc >= 4) {
-   cc = 0;
-  }
+  if(num > 10) num = 1;
+  num ++;
   
-  //background(20,20,200);
   imageMode(CORNER);
-  image(bgImg,0,0,axeX,axeY);
+  //image(bgImg,0,0,axeX,axeY);
   bird.BirdFill();
   bird.display();
   
-  textSize(128);
-  fill(0,408,612);
-  text("Score: ", 40, 120);
-  fill(20,200,20);
+  fill(255);
   
   for(int i=0; i<obsNumber; i+=2){
    displayObstacle(obstacle[i],obstacle[i+1]);
@@ -87,13 +92,30 @@ void draw(){
    }
    
    setCollisionProperties(i, obstacle[i],obstacle[i+1]);
-   if(collision(i, (bird.getPos_X() + radius), (bird.getPos_Y()))) noLoop();
+   if(collision(i, (bird.getPos_X() + radius), (bird.getPos_Y()))){ 
+     noLoop();
+   } else {
+     updateScore(i);     
+   }
+
    moveObstacle(obstacle[i], obstacle[i+1]);
   }
   
   bird.freeFalling();
-  ellipse(obstacle[3].getPos_X()+3*radius/2,obstacle[3].getPos_Y()- radius/2,50,50);
+  textSize(40);
+  fill(0);
+  
+  String displayScore = "SCORE: " + score;
+  text(displayScore, 10, 30);
 }
+
+void updateScore(int index){
+   if(obstacle[index].getPos_X()  < bird.getPos_X()) {
+     
+     score = index+1 + score;
+   } 
+}
+
 
 void displayObstacle(Obstacle obs0,Obstacle obs1){
   obs0.display();
@@ -110,6 +132,7 @@ boolean collision(int indexObs,float birdX, float birdY){
       (birdY <= collisionY[indexObs]  || birdY + radius >= collisionY[indexObs+1])){
    return true; 
   }
+  if(birdY < 0 || birdY + radius > axeY) return true;
   return false;
 }
 
@@ -122,10 +145,10 @@ void setCollisionProperties(int indexObs,Obstacle obs0, Obstacle obs1){
 }
 
 void loopObstacle(Obstacle obs0,Obstacle obs1){
-    float topHeight = random(100,500);
+    float topHeight = random(150,500);
     float bottomHeight = (axeY - (topHeight+120));
-    float speed = random(350,450);
-    float obstacleX = obs_x + speed*1.5;
+    float speed = 700;//random(400,550);
+    float obstacleX = obs_x + speed*2;
     
     obs0.setPos_X(obstacleX);
     obs0.setHeight(topHeight);
@@ -134,6 +157,7 @@ void loopObstacle(Obstacle obs0,Obstacle obs1){
     obs1.setHeight(bottomHeight);
     obs1.setPos_Y(topHeight+120);
 }
+int I = 1;
 
 class Obstacle{
   float x, y, w, h;
@@ -240,16 +264,19 @@ class Bird{
     return r;
   }
   
-  void display(){
-    //ellipse(x,y,r,r); 
+  void display(){ 
     image(birdImg, x, y, r, r);
   }
 }
 
 void keyPressed(){
- if(key == ' ') speedY = -3; 
+  
+ if(key == ' ') speedY = -5; 
+ if(key == 's' || key == 'S') noLoop();
+ if(key == 'p' || key == 'P') loop();
+
 }
 
 void keyReleased(){
- if (key == ' ') speedY = 1.5; 
+ if (key == ' ') speedY = 2; 
 }
